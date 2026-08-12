@@ -62,9 +62,4 @@ def load(path: Path = CONFIG_PATH) -> Config:
             'expected "txt" or "gdoc"'
         )
 
-    # Selecting the account here means every entry point picks it up without
-    # each one having to remember to.
-    from pipeline import auth
-    auth.set_profile(cfg.account)
-
     return cfg

@@ -9,6 +9,7 @@ Neither credentials.json nor token.json should ever enter a git repo.
 
 from __future__ import annotations
 
+import tomllib
 from pathlib import Path
 
 from google.auth.exceptions import RefreshError, TransportError
@@ -34,19 +35,46 @@ CREDENTIALS_PATH = BASE_DIR / "credentials.json"
 # acts as is a config change rather than deleting a file and re-authorising.
 # Tokens for every profile persist, so switching back does not re-prompt.
 _TOKEN_PATH = BASE_DIR / "token.json"          # legacy, still honoured
-_profile = "default"
+_profile: str | None = None
+
+
+def _profile_from_config() -> str:
+    """Read auth.account straight from config.toml.
+
+    Deliberately not via pipeline.config: the profile has to resolve for
+    every entry point, including the tools that never load config. Making
+    it a side effect of config.load() meant seven of eleven tools silently
+    acted as the wrong account — including one that trashes files.
+    """
+    path = BASE_DIR / "config.toml"
+    if not path.exists():
+        return "default"
+    try:
+        with path.open("rb") as fh:
+            return (tomllib.load(fh).get("auth", {})
+                    .get("account", "default").strip() or "default")
+    except (OSError, tomllib.TOMLDecodeError):
+        return "default"
 
 
 def set_profile(name: str) -> None:
-    """Select which stored account to act as. Called from config load."""
+    """Override the configured profile. Rarely needed."""
     global _profile
     _profile = (name or "default").strip() or "default"
 
 
+def active_profile() -> str:
+    global _profile
+    if _profile is None:
+        _profile = _profile_from_config()
+    return _profile
+
+
 def token_path() -> Path:
-    if _profile == "default":
+    name = active_profile()
+    if name == "default":
         return _TOKEN_PATH
-    return BASE_DIR / f"token-{_profile}.json"
+    return BASE_DIR / f"token-{name}.json"
 
 
 def get_credentials() -> Credentials:
@@ -80,7 +108,7 @@ def get_credentials() -> Credentials:
         )
 
     flow = InstalledAppFlow.from_client_secrets_file(str(CREDENTIALS_PATH), SCOPES)
-    print(f"Authorising profile '{_profile}' — sign in as the intended account.")
+    print(f"Authorising profile '{active_profile()}' — sign in as the intended account.")
     creds = flow.run_local_server(port=0)
     tp.write_text(creds.to_json())
     tp.chmod(0o600)
