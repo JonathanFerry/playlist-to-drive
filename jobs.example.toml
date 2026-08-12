@@ -1,0 +1,23 @@
+# jobs.toml — playlists to process in series.
+#
+# Copy to jobs.toml and edit. jobs.toml is gitignored; this file is not,
+# so keep real identifiers out of it.
+#
+# Run in series, not in parallel. Two runs authenticate as the same user
+# against the same Cloud project, so they share one quota pool. Running
+# two does not halve the time, it doubles the request rate and makes
+# quota exhaustion likely, leaving two half-finished manifests instead of
+# one clean run.
+#
+# Each job gets its own manifest, named after the job in lowercase, and
+# can be re-run independently of the others.
+
+[[job]]
+name = "FirstPlaylist"
+folder_id = "YOUR_FOLDER_ID"
+playlist_url = "https://www.youtube.com/playlist?list=YOUR_PLAYLIST_ID"
+
+[[job]]
+name = "SecondPlaylist"
+folder_id = "YOUR_OTHER_FOLDER_ID"
+playlist_url = "https://www.youtube.com/playlist?list=YOUR_OTHER_PLAYLIST_ID"

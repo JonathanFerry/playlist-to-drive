@@ -1,0 +1,43 @@
+# transcript-pipeline configuration
+#
+# Copy to config.toml and fill in your own values.
+# config.toml is gitignored; this example file is committed.
+
+[auth]
+# Which stored Google account to act as. Each profile keeps its own token,
+# so switching is a config change — no deleting files, and switching back
+# does not re-prompt. Any name works; the first run for a new name opens a
+# browser once.
+account = "default"
+
+[source]
+# YouTube playlist to mirror. Must be public or unlisted — a private
+# playlist returns HTTP 403 without authentication.
+playlist_url = "https://www.youtube.com/playlist?list=YOUR_PLAYLIST_ID"
+
+# Optional: read cookies from a browser for private playlists.
+# Leave empty for public/unlisted. Values: chrome, brave, firefox, safari, edge
+# Note that browser sessions expire, so this needs periodic re-authentication.
+cookies_from_browser = ""
+
+[destination]
+# Google Drive folder ID — the string after /folders/ in the folder URL.
+folder_id = "YOUR_FOLDER_ID"
+
+# "txt"  — upload as plain text. What a machine wants: no conversion, no
+#          markup, readable by anything without a parser.
+# "gdoc" — convert to a Google Doc. Readable in a browser and formattable,
+#          but a consumer has to export it back to text first.
+file_format = "txt"
+
+[behaviour]
+# Never delete. Videos removed from the playlist keep their transcripts and
+# are only reported. A video pulled from YouTube makes its transcript the
+# only surviving copy, so removal is not mirrored.
+delete_removed = false
+
+# Sync Drive document titles when a YouTube title changes.
+sync_renames = true
+
+# Requests per minute against YouTube. Keep modest to avoid throttling.
+rate_limit_per_minute = 20

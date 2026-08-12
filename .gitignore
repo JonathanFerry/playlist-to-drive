@@ -1,0 +1,34 @@
+# Secrets — never commit
+# Every root-level .json is either a credential, a token, or pipeline
+# state. Listing them individually leaked what the manifests were
+# named, which said more about the destinations than it should have.
+/*.json
+/*.json.tmp
+config.toml
+
+# Pipeline state (machine-local)
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Scratch
+new_batch/
+*.vtt
+*.log
+inspect_unparsed.py
+
+# macOS
+.DS_Store
+jobs.toml
+val.py
+precheck.py
+chkfolder.py
+diag*.py
+t_res.py
+ALERT.txt
+transcript-report.md
+.locks/

@@ -1,0 +1,15 @@
+# Google API client, for Drive and Docs.
+# Lower bounds rather than pins: this is a small tool with a stable API
+# surface, and pinning would age badly on a repo that gets touched rarely.
+google-api-python-client>=2.190
+google-auth>=2.50
+google-auth-httplib2>=0.2
+google-auth-oauthlib>=1.2
+
+# yt-dlp is NOT listed here on purpose. It is called as a command-line
+# program, not imported, and it needs updating far more often than
+# anything else — YouTube changes break it regularly. Install it with
+# your system package manager so it can be upgraded independently:
+#
+#   brew install yt-dlp        (macOS)
+#   pipx install yt-dlp        (anywhere)
