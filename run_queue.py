@@ -37,7 +37,13 @@ def load_jobs() -> list[dict]:
 
 
 def write_config(job: dict) -> None:
-    """Point config.toml at this job. Behaviour settings are preserved."""
+    """Point config.toml at this job. Behaviour settings are preserved.
+
+    A job may name its own account. Destinations owned by different Google
+    accounts otherwise mean editing config between every run, and getting
+    it wrong means either a permission failure or files written under the
+    wrong owner.
+    """
     path = BASE / "config.toml"
     lines = path.read_text().splitlines()
     out = []
@@ -46,6 +52,8 @@ def write_config(job: dict) -> None:
             out.append(f'playlist_url = "{job["playlist_url"]}"')
         elif line.startswith("folder_id"):
             out.append(f'folder_id = "{job["folder_id"]}"')
+        elif line.startswith("account") and job.get("account"):
+            out.append(f'account = "{job["account"]}"')
         else:
             out.append(line)
     path.write_text("\n".join(out) + "\n")
@@ -72,6 +80,8 @@ def run_job(job: dict, index: int, total: int) -> int:
     print("\n" + "=" * 70)
     print(f"JOB {index}/{total}: {name}")
     print(f"  folder   : {job['folder_id']}")
+    if job.get("account"):
+        print(f"  account  : {job['account']}")
     print(f"  manifest : {manifest_name(job)} ({manifest_count(job)} existing)")
     print(f"  started  : {started:%H:%M:%S}")
     print("=" * 70, flush=True)
