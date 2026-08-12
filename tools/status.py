@@ -91,7 +91,7 @@ def summarise(path: Path) -> dict:
 
 def snapshot() -> None:
     print("=" * 74)
-    print(f"transcript-pipeline status   {datetime.now():%Y-%m-%d %H:%M:%S}")
+    print(f"playlist-to-drive status   {datetime.now():%Y-%m-%d %H:%M:%S}")
     print("=" * 74)
 
     worker = running("run.py --apply")

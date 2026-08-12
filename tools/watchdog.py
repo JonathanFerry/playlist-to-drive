@@ -108,7 +108,7 @@ def main() -> int:
 
             if not worker and not supervisor:
                 if "done" not in warned:
-                    alert("transcript-pipeline",
+                    alert("playlist-to-drive",
                           "All processes stopped — finished or crashed",
                           "transcript pipeline has stopped")
                     warned.add("done")
@@ -118,7 +118,7 @@ def main() -> int:
 
             if worker and not supervisor:
                 if "chain" not in warned:
-                    alert("transcript-pipeline",
+                    alert("playlist-to-drive",
                           "Supervisor died — nothing will run after this job",
                           "supervisor died. the queue is broken")
                     warned.add("chain")
@@ -130,7 +130,7 @@ def main() -> int:
 
             if worker and age > args.stall:
                 if "stall" not in warned:
-                    alert("transcript-pipeline",
+                    alert("playlist-to-drive",
                           f"No manifest write for {age:.0f} minutes — possibly hung",
                           "the run appears to be stalled")
                     warned.add("stall")

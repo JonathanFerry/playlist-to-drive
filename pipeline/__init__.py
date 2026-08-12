@@ -1,1 +1,1 @@
-"""transcript-pipeline core modules."""
+"""playlist-to-drive core modules."""
