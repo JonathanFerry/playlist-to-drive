@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import random
+import re
 import sys
 import time
 
@@ -32,6 +33,7 @@ from pipeline.lock import FolderLock, AlreadyRunning
 
 CAPTION_ATTEMPTS = 4
 CAPTION_BASE_DELAY = 15.0   # YouTube throttles for longer than an API does
+PLACEHOLDER_TITLE = re.compile(r"^\[(Deleted|Private|Unavailable) video\]$")
 
 
 def fetch_captions_with_backoff(video_id, cookies_browser, on_throttle=None):
@@ -155,8 +157,7 @@ def _run(args, cfg, dry) -> int:
     # document has been deleted or trashed would otherwise be skipped
     # forever, leaving a permanent gap. One folder listing is far cheaper
     # than an existence check per entry.
-    from bootstrap import list_docs
-    live_ids = {f["id"] for f in list_docs(drive, cfg.folder_id)}
+    live_ids = {f["id"] for f in drive_mod.list_docs(drive, cfg.folder_id)}
 
     missing = [e for e in manifest.entries.values()
                if e.status == COMPLETED and e.drive_file_id
@@ -259,6 +260,11 @@ def _run(args, cfg, dry) -> int:
         for video in videos:
             e = manifest.get(video.video_id)
             if not e or e.status != COMPLETED or not e.drive_file_id:
+                continue
+            # A deleted or private video keeps its slot in the playlist
+            # under a placeholder title. Syncing to it would erase the one
+            # name left on what may be the last copy of the transcript.
+            if PLACEHOLDER_TITLE.match(video.title):
                 continue
             wanted = fmt.normalize_title(video.title)
             if e.title != wanted:
