@@ -111,10 +111,14 @@ def captions(video_id: str, cookies_browser: str = "") -> str:
 
     with tempfile.TemporaryDirectory(prefix="tp-") as tmp:
         tmpdir = Path(tmp)
+        # en-orig is the untranslated speech-recognition track. The plain
+        # "en" auto track is often refused with 429 while en-orig downloads
+        # fine, and a failed track aborts the rest - so en-orig goes first
+        # and is already on disk when "en" fails.
         cmd = _base_cmd(cookies_browser) + [
             "--skip-download",
             "--write-sub", "--write-auto-sub",
-            "--sub-lang", "en",
+            "--sub-lang", "en-orig,en",
             "--sub-format", "vtt",
             "-o", str(tmpdir / "%(id)s"),
             url,
@@ -129,7 +133,7 @@ def captions(video_id: str, cookies_browser: str = "") -> str:
                 raise Unavailable(_why(proc.stderr))
             raise NoCaptions("no English caption track")
 
-        # A manually-uploaded track has no ".auto." marker and is preferred.
-        manual = [f for f in files if "auto" not in f.name.lower()]
-        chosen = manual[0] if manual else files[0]
+        # "en" is the manual track when one exists, so it wins when it
+        # arrived. Filenames carry no manual/auto marker to go on.
+        chosen = next((f for f in files if f.name.endswith(".en.vtt")), files[0])
         return chosen.read_text(encoding="utf-8", errors="replace")
